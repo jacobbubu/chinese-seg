@@ -1,0 +1,33 @@
+{
+  "name": "chinese-seg",
+  "version": "0.0.0",
+  "description": "Implement Chinese text segmentation algorithm",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test/*-test.coffee --stderr --timeout 5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jacobbubu/chinese-seg"
+  },
+  "keywords": [
+    "chinese",
+    "segmentation"
+  ],
+  "author": "Rong Shen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jacobbubu/chinese-seg/issues"
+  },
+  "homepage": "https://github.com/jacobbubu/chinese-seg",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-coffee": "~0.8.0",
+    "tap": "~0.4.6"
+  },
+  "dependencies": {
+    "errno": "~0.1.0",
+    "hanzenkaku": "~1.0.1"
+  }
+}
