@@ -1,13 +1,16 @@
 # split text by \r or \n
 module.exports = (options) ->
-  utils = require '../utils'
-  options = options ? {}
+  { noop, path, extend, unique, tokenizeSync } = require '../utils'
+  options = extend { removeToken: true, propName: 'crlf' }, options
+  CRLF = ['\r', '\n']
   isToken = (text, index) ->
-    CRLF = ['\r', '\n']
     text.charAt(index) in CRLF
+  options.isToken = isToken
 
-  (words, next) ->
-    result = []
-    for word in words
-      result = result.concat utils.splitWord word, isToken, 'crlf', true
+  name = path.basename __filename, path.extname(__filename)
+  fn = (words, next) ->
+    next ?= noop
+    result = tokenizeSync words, options
     next null, result
+
+  { name, fn }

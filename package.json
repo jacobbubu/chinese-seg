@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "errno": "~0.1.0",
-    "hanzenkaku": "~1.0.1"
+    "hanzenkaku": "~1.0.1",
+    "xtend": "~2.1.2",
+    "deep-equal": "~0.2.1"
   }
 }

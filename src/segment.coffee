@@ -11,15 +11,13 @@ class Segment
 
 exports = module.exports = Segment
 exports.proto = proto
-exports.middleware = {}
+exports.middleware = middleware = {}
 
 # Auto-load bundled middleware with getters.
 fs.readdirSync(__dirname + '/middleware').forEach (filename) ->
   return unless /\.js$/.test filename
   if fs.statSync(__dirname + '/middleware/' + filename).isFile()
     name = basename filename, '.js'
-    load = -> require './middleware/' + name
-    exports.middleware.__defineGetter__ name, load
-    exports.__defineGetter__ name, load
-
-
+    load = require './middleware/' + name
+    exports[name] = load
+    middleware[name] = load
