@@ -1,72 +1,51 @@
 # Matched URL will be marked as 'url: 1' in props.
 
 # Use this regexp to find out shcheme, userinfo and host
-urlPattern = /(?:http|https|ftp|sftp|git|ssh):(?:\/\/)(?:[-;:&=\+\$,\w]+@)?(?:(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|(?:['\!\(\)\*\-\w]*\.)*(?:['\!\(\)\*\-\w]*\.)(?:com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2})(?:\:[0-9]{1,5})?)/ig
+urlPattern = do ->
+  protocol = "(?:http|https|ftp|sftp|git|ssh):(?://)"
+  auth = "(?:[-;:&=\\+\\$,\\w]+@)"
+  ipPart = "(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])"
+  ip = ipPart + '\\.' + ipPart + '\\.' + ipPart + '\\.' + ipPart
+  localhost = "localhost"
+  # host1 = "(?:['\\!\\*\\-\\w]*\\.)*(?:['\\!\\*\\-\\w]*\.)"
+  host1 = "(?:['\\!\\*\\-\\w]*\\.)+"
+  host2 = "(?:['\\!\\*\\-\\w]*\\.){2,}"
+  domain = "(?:com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2})"
+  port = "(?:\\:[0-9]{1,5})"
+  finalPart1 = protocol + auth + '?' + '(' + ip + '|' + localhost + '|' + host1 + domain + ')' + port + '?'
+  finalPart2 = '(' + ip + '|' + localhost + '|' +  host2 + domain + ')' + port + '?'
+  new RegExp "(#{finalPart1})|(#{finalPart2})" , 'gi'
+
+# urlPattern = /(?:http|https|ftp|sftp|git|ssh):(?:\/\/)(?:[-;:&=\+\$,\w]+@)?(?:(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9])\.(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[1-9]|0)\.(?:25[0-5]|2[0-4][0-9]|[0-1]{1}[0-9]{2}|[1-9]{1}[0-9]{1}|[0-9])|localhost|(?:['\!\(\)\*\-\w]*\.)*(?:['\!\(\)\*\-\w]*\.)(?:com|edu|gov|int|mil|net|org|biz|arpa|info|name|pro|aero|coop|museum|[a-zA-Z]{2})(?:\:[0-9]{1,5})?)/ig
 
 module.exports = (options) ->
-  { noop, path, extend, findOne, unique } = require '../utils'
-  options = extend { removeToken: false, propName: 'url' }, options
-  options.skipProps = unique [options.propName].concat (options.skipProps ? [])
+  { noop, path, extend, matchSync, chnRange } = require '../utils'
+  options = extend { propName: 'url' }, options
 
-  findURL = (word) ->
+  tailReg = new RegExp "\\s|[#{chnRange}]"
 
-    # Find out url tail position.
-    tailAt = (text, start) ->
-      puncs = ['.', ',', ';', '!', '<', '>', '(', ')']
-      reachTail = (ch) -> /\s|[\u4e00-\u9FFF]/.test ch
-      for index in [start...text.length]
-        char = text.charAt index
-        break if reachTail char
-      if index > 0
-        prevChar = text.charAt index - 1
-        if prevChar in puncs
-          index -= 1
-      index
+  puncs = do ->
+    latin = '.?!,:;(){}[]"\''
+    chinese = '。。？！，、；：（）［］〔〕【】﹃﹄﹁﹂《》〈〉…“”‘’„‚'
+    (latin + chinese).split ''
 
-    result = []
-    matched = word.w.match urlPattern
-    if matched?
-      start = word.start
-      text = word.w
-      for urlHost in matched
-        index = text.indexOf urlHost
-        tail = tailAt text, index
-        # word before url
-        if index > 0
-          value =
-            w: text.slice 0, index
-            start: start
-          value.props = word.props if word.props?
-          result.push value
-        # url part
-        value =
-          w: text.slice index, tail
-          start: start + index
-          props: word.props ? {}
-        value.props[options.propName] = 1
-        result.push value
-
-        text = text.slice tail
-        start += tail
-      if start < word.w.length
-        value =
-          w: text
-          start: start
-        value.props = word.props if word.props?
-        result.push value
-    else
-      result.push word
-    result
+  # Find out url tail position.
+  tailAt = (text, start) ->
+    reachTail = (ch) -> tailReg.test ch
+    for index in [start...text.length]
+      char = text.charAt index
+      break if reachTail char
+    if index > 0
+      prevChar = text.charAt index - 1
+      if prevChar in puncs
+        index -= 1
+    index
 
   name = path.basename __filename, path.extname(__filename)
   fn = (words, next) ->
     next ?= noop
-    result = []
-    for word in words
-      if findOne word.props, options.skipProps
-        result.push word
-      else
-        result = result.concat findURL word
-    next null, result
+    options.pattern = urlPattern
+    options.tailAt = tailAt
+    next null, matchSync(words, options)
 
   { name, fn }

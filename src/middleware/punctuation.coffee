@@ -4,17 +4,24 @@ module.exports = (options) ->
   { noop, path, extend, unique, tokenizeSync } = require '../utils'
   options = extend { removeToken: false, propName: 'punc' }, options
   options.skipProps = unique [options.propName].concat options.skipProps
-  _stopwords = '\u3000 ,.;+-|/\\\'":?<>[]{}=!@#$%^&*()~`' +
-              '。，、＇：∶；?‘’“”〝〞ˆˇ﹕︰﹔﹖﹑·¨….¸;！´？！～—ˉ｜‖＂〃｀@﹫¡¿﹏﹋﹌︴々﹟#﹩$﹠&﹪%*﹡﹢﹦' +
-              '﹤‐￣¯―﹨ˆ˜﹍﹎+=<­＿_-\ˇ~﹉﹊（）〈〉‹›﹛﹜『』〖〗［］《》〔〕{}「」【】︵︷︿︹︽_﹁﹃︻︶︸' +
-              '﹀︺︾ˉ﹂﹄︼＋－×÷﹢﹣±／＝≈≡≠∧∨∑∏∪∩∈⊙⌒⊥∥∠∽≌＜＞≤≥≮≯∧∨√﹙﹚[]﹛﹜∫∮∝∞⊙∏' +
-              '┌┬┐┏┳┓╒╤╕─│├┼┤┣╋┫╞╪╡━┃└┴┘┗┻┛╘╧╛┄┆┅┇╭─╮┏━┓╔╦╗┈┊│╳│┃┃╠╬╣┉┋╰─╯┗━┛' +
-              '╚╩╝╲╱┞┟┠┡┢┦┧┨┩┪╉╊┭┮┯┰┱┲┵┶┷┸╇╈┹┺┽┾┿╀╁╂╃╄╅╆' +
-              '○◇□△▽☆●◆■▲▼★♠♥♦♣☼☺◘♀√☻◙♂×▁▂▃▄▅▆▇█⊙◎۞卍卐╱╲▁▏↖↗↑←↔◤◥╲╱▔▕↙↘↓→↕◣◢∷▒░℡™'
+  # _stopwords = ',.;+-|/\\\'":?<>[]{}=!@#$%^&*()~`' +
+  #             '。，、＇：∶；?‘’“”〝〞ˆˇ﹕︰﹔﹖﹑·¨….¸;！´？！～—ˉ｜‖＂〃｀@﹫¡¿﹏﹋﹌︴々﹟#﹩$﹠&﹪%*﹡﹢﹦' +
+  #             '﹤‐￣¯―﹨ˆ˜﹍﹎+=<­＿_-\ˇ~﹉﹊（）〈〉‹›﹛﹜『』〖〗［］《》〔〕{}「」【】︵︷︿︹︽_﹁﹃︻︶︸' +
+  #             '﹀︺︾ˉ﹂﹄︼＋－×÷﹢﹣±／＝≈≡≠∧∨∑∏∪∩∈⊙⌒⊥∥∠∽≌＜＞≤≥≮≯∧∨√﹙﹚[]﹛﹜∫∮∝∞⊙∏' +
+  #             '┌┬┐┏┳┓╒╤╕─│├┼┤┣╋┫╞╪╡━┃└┴┘┗┻┛╘╧╛┄┆┅┇╭─╮┏━┓╔╦╗┈┊│╳│┃┃╠╬╣┉┋╰─╯┗━┛' +
+  #             '╚╩╝╲╱┞┟┠┡┢┦┧┨┩┪╉╊┭┮┯┰┱┲┵┶┷┸╇╈┹┺┽┾┿╀╁╂╃╄╅╆' +
+  #             '○◇□△▽☆●◆■▲▼★♠♥♦♣☼☺◘♀√☻◙♂×▁▂▃▄▅▆▇█⊙◎۞卍卐╱╲▁▏↖↗↑←↔◤◥╲╱▔▕↙↘↓→↕◣◢∷▒░℡™'
+  _stopwords = do ->
+    latin = '.?!,:;(){}[]"\''
+    chinese = '。。？！，、；：（）［］〔〕【】﹃﹄﹁﹂《》〈〉…“”‘’„‚'
+    latin + chinese
+
   stopwords = do ->
     result = {}
     _stopwords.split('').forEach (ch) -> result[ch] = true
     result
+
+  latinAlphaPattern = /[a-zA-Z\xC0-\xD6\xD8-\xF6-\xFE]/
 
   isToken = (text, index) ->
     oriChar = text.charAt index; halfChar = oriChar.toHalfwidth().toHalfwidthSpace()
@@ -25,15 +32,9 @@ module.exports = (options) ->
     switch halfChar
       # skip sinngle quote in "doen't, hasn't, didn't, etc."
       when "'"
-        result = stopwords[prevChar]? or stopwords[nextChar]?
+        result = not (latinAlphaPattern.test(prevChar) and latinAlphaPattern.test(nextChar))
       # 12.3, .01
       when "."
-        result = not (nextChar.charCodeAt() in ['0'.charCodeAt()..'9'.charCodeAt()])
-      # -12
-      when "-"
-        result = not (nextChar.charCodeAt() in ['0'.charCodeAt()..'9'.charCodeAt()])
-      # +12
-      when "+"
         result = not (nextChar.charCodeAt() in ['0'.charCodeAt()..'9'.charCodeAt()])
       else
         result= stopwords[oriChar]?

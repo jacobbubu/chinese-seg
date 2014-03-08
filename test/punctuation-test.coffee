@@ -30,41 +30,24 @@ test 'middleware punctuation runs', (t) ->
   t.test "Skip has't, didn't", (t) ->
     text = "Didn't he ask, 'What did we do, who preceded you?'"
     expected = [
-      { w: 'Didn\'t', start: 0 }
-      { w: ' ', start: 6, props: punc: 1 }
-      { w: 'he', start: 7 }
-      { w: ' ', start: 9, props: punc: 1 }
-      { w: 'ask', start: 10 }
-      { w: ', \'', start: 13, props: punc: 1 }
-      { w: 'What', start: 16 }
-      { w: ' ', start: 20, props: punc: 1 }
-      { w: 'did', start: 21 }
-      { w: ' ', start: 24, props: punc: 1 }
-      { w: 'we', start: 25 }
-      { w: ' ', start: 27, props: punc: 1 }
-      { w: 'do', start: 28 }
-      { w: ', ', start: 30, props: punc: 1 }
-      { w: 'who', start: 32 }
-      { w: ' ', start: 35, props: punc: 1 }
-      { w: 'preceded', start: 36 }
-      { w: ' ', start: 44, props: punc: 1 }
-      { w: 'you', start: 45 }
+      { w: 'Didn\'t he ask', start: 0 }
+      { w: ',', start: 13, props: punc: 1 }
+      { w: ' ', start: 14 }
+      { w: '\'', start: 15, props: punc: 1 }
+      { w: 'What did we do', start: 16 }
+      { w: ',', start: 30, props: punc: 1 }
+      { w: ' who preceded you', start: 31 }
       { w: '?\'', start: 48, props: punc: 1 }
     ]
     new Segment().use(Segment.punctuation()).handle text, (err, result) ->
       t.deepEqual result, expected
       t.end()
 
-  t.test "Skip decimal point, negative/positive signs in number", (t) ->
-    text = "12.34 １２．３４ -1 ＋１"
+  t.test "Skip decimal point in number", (t) ->
+    text = "We've got 12.34 and１２．３４."
     expected = [
-      { w: '12.34', start: 0 },
-      { w: ' ', start: 5, props: punc: 1 },
-      { w: '１２．３４', start: 6 },
-      { w: ' ', start: 11, props: punc: 1 },
-      { w: '-1', start: 12 },
-      { w: ' ', start: 14, props: punc: 1 },
-      { w: '＋１', start: 15 }
+      { w: 'We\'ve got 12.34 and１２．３４', start: 0 }
+      { w: '.', start: 24, props: punc: 1 }
     ]
     new Segment().use(Segment.punctuation()).handle text, (err, result) ->
       t.deepEqual result, expected

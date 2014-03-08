@@ -43,22 +43,35 @@ test 'middleware url runs', (t) ->
         t.deepEqual result, expected
         t.end()
 
+    t.test 'url without protocol', (t) ->
+      text = '''
+        访问www.nodejs.org可以下载到 NodeJS 最新的文档
+      '''
+      expected = [
+        { w: '访问', start: 0 }
+        { w: 'www.nodejs.org', start: 2, props: url: 1 }
+        { w: '可以下载到 NodeJS 最新的文档', start: 16 }
+      ]
+      new Segment().use(Segment.url()).handle text, (err, result) ->
+        t.deepEqual result, expected
+        t.end()
+
   t.test 'multi urls in text', (t) ->
     text = '''
       MEAN is a boilerplate that provides a nice starting point for
-      MongoDB(http://www.mongodb.org/), Node.js(http://www.nodejs.org/),
+      MongoDB(http://www.mongodb.org/), Node.js(www.nodejs.org/),
       Express(http://expressjs.com/), and AngularJS(http://angularjs.org/) based applications.
     '''
     expected = [
       { w: 'MEAN is a boilerplate that provides a nice starting point for\nMongoDB(', start: 0 }
       { w: 'http://www.mongodb.org/)', start: 70, props: url: 1 }
       { w: ', Node.js(', start: 94 }
-      { w: 'http://www.nodejs.org/)', start: 104, props: url: 1 }
-      { w: ',\nExpress(', start: 127 }
-      { w: 'http://expressjs.com/)', start: 137, props: url: 1 }
-      { w: ', and AngularJS(', start: 159 }
-      { w: 'http://angularjs.org/', start: 175, props: url: 1 }
-      { w: ') based applications.', start: 196 } 
+      { w: 'www.nodejs.org/)', start: 104, props: url: 1 }
+      { w: ',\nExpress(', start: 120 }
+      { w: 'http://expressjs.com/)', start: 130, props: url: 1 }
+      { w: ', and AngularJS(', start: 152 }
+      { w: 'http://angularjs.org/', start: 168, props: url: 1 }
+      { w: ') based applications.', start: 189 }
     ]
     new Segment().use(Segment.url()).handle text, (err, result) ->
       t.deepEqual result, expected

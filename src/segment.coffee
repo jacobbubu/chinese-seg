@@ -7,6 +7,7 @@ basename = path.basename
 class Segment
   constructor: ->
     utils.merge @, proto
+    @utils = utils
     @stack = []
 
 exports = module.exports = Segment
