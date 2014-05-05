@@ -5,7 +5,7 @@ module.exports = (options) ->
     atSigns = "[@＠]"
     validMention =
       "(#{atSigns})" +                     # $1: At mark
-      "([a-zA-Z0-9_#{chnRange}]{1,30})"  # $2: Screen name
+      "([a-zA-Z0-9_\\-#{chnRange}]{1,30})"  # $2: Screen name
     new RegExp validMention, 'gi'
 
   options = extend { propName: 'weiboMention' }, options
