@@ -33,9 +33,10 @@ module.exports = (options) ->
       # skip sinngle quote in "doen't, hasn't, didn't, etc."
       when "'"
         result = not (latinAlphaPattern.test(prevChar) and latinAlphaPattern.test(nextChar))
-      # 12.3, .01
-      when "."
-        result = not (nextChar.charCodeAt() in ['0'.charCodeAt()..'9'.charCodeAt()])
+      # 12.3,
+      when '.'
+        result = not (nextChar.charCodeAt() in ['0'.charCodeAt()..'9'.charCodeAt()] and
+          prevChar.charCodeAt() in ['0'.charCodeAt()..'9'.charCodeAt()] )
       else
         result= stopwords[oriChar]?
     result

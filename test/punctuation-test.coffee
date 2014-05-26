@@ -52,3 +52,20 @@ test 'middleware punctuation runs', (t) ->
     new Segment().use(Segment.punctuation()).handle text, (err, result) ->
       t.deepEqual result, expected
       t.end()
+
+  t.test ".1", (t) ->
+    text = ".1"
+    expected = [
+      { w: '.', start: 0, props: { punc: 1 } }
+      { w: '1', start: 1 }
+    ]
+    new Segment().use(Segment.punctuation()).handle text, (err, result) ->
+      t.deepEqual result, expected
+      t.end()
+
+  t.test "1.1", (t) ->
+    text = "1.1"
+    expected = [ { w: '1.1', start: 0 } ]
+    new Segment().use(Segment.punctuation()).handle text, (err, result) ->
+      t.deepEqual result, expected
+      t.end()
