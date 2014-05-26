@@ -37,7 +37,7 @@ module.exports = (options) ->
           while true
             w1 = words[i + len]
             w2 = words[i + len + 1]
-            if isNumeral(w1) and w2? and DATETIME[w2.w]?
+            if w1? and isNumeral(w1) and w2? and DATETIME[w2.w]?
               len += 2
               newWord = newWord + w1.w + w2.w
             else
