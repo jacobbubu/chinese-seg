@@ -30,6 +30,18 @@ test 'middleware url runs', (t) ->
         t.deepEqual result, expected
         t.end()
 
+    t.test 'full-width in url', (t) ->
+      text = '''
+        http://t.cn/RvADVCN）)
+      '''
+      expected = [
+        { w: 'http://t.cn/RvADVCN', start: 0, props: { url: 1 } },
+        { w: '）)', start: 19 } 
+      ]
+      new Segment().use(Segment.url()).handle text, (err, result) ->
+        t.deepEqual result, expected
+        t.end()
+
     t.test 'url in Chinese characters', (t) ->
       text = '''
         访问http://www.nodejs.org可以下载到 NodeJS 最新的文档

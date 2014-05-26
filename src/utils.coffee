@@ -2,7 +2,7 @@ noop = exports.noop = ->
 extend = exports.extend = require 'xtend'
 path = exports.path = require 'path'
 eql = exports.eql = require 'deep-equal'
-chnRange = exports.chnRange = '\\u2E80-\\uFE4F'
+chnRange = exports.chnRange = '\\u2E80-\\uFFFF'
 
 merge = exports.merge = (a, b) ->
   if a? and b?
