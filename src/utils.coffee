@@ -119,10 +119,12 @@ findMatchSync = exports.findMatchSync= (word, options) ->
     text = word.w
     for oneMatched in allMatched
       index = text.indexOf oneMatched
+
       if options.tailAt?
         tail = options.tailAt text, index
       else
         tail = index + oneMatched.length
+
       # word before matched
       if not removeSplitter and index > 0
         value =
@@ -139,7 +141,8 @@ findMatchSync = exports.findMatchSync= (word, options) ->
 
       text = text.slice tail
       start += tail
-    if not removeSplitter and start < word.w.length
+
+    if not removeSplitter and (start - word.start) < word.w.length
       value =
         w: text
         start: start
