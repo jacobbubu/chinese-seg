@@ -46,6 +46,7 @@ loadFolder = (folder, dict) ->
 
 module.exports = (options) ->
   options = extend {}, options
+  repetedReg = /([^\s])\1{2,}/
 
   if not sysDict
     dictPath = path.resolve __dirname, '../../dict'
@@ -213,14 +214,20 @@ module.exports = (options) ->
 
   # find out all combinations of words
   getChunks = (wordpos, pos, text) ->
-    words = wordpos[pos]
     ret = []
+    len = text.length
+    while (not wordpos[pos]?) and pos < len
+      pos++
+
+    words = wordpos[pos]
+    return ret if not words?
+
     for word in words
       nextCurr = word.curr + word.w.length
-      unless wordpos[nextCurr]?
+      if nextCurr >= len
         ret.push [word]
       else
-        chunks = getChunks wordpos, nextCurr
+        chunks = getChunks wordpos, nextCurr, text
         for chunk in chunks
           ret.push [word].concat(chunk)
     ret
@@ -235,7 +242,8 @@ module.exports = (options) ->
 
     # filling out the pos gap
     for i in [0...text.length]
-      wordpos[i] = [ {w: text.charAt(i), curr: i, freq: 0} ] unless wordpos[i]
+      ch = text.charAt i
+      wordpos[i] = [ {w: ch, curr: i, freq: 0} ] unless wordpos[i] or ch is ' '
     wordpos
 
   getTops = (scores, chunks) ->
@@ -384,7 +392,8 @@ module.exports = (options) ->
     # 计算排名
     top = getTops scores, chunks
     currChunk = chunks[top]
-    ret = optimizer currChunk
+    optimizer currChunk
+
     # dateTimeOptimizer ret
 
     # remove unidentified words
@@ -393,6 +402,14 @@ module.exports = (options) ->
 
   matchWord = (text, curr, prevWord) ->
     ret = []
+
+    repeatedCharMatched = text.match repetedReg
+    while repeatedCharMatched?
+      index = repeatedCharMatched.index
+      len = repeatedCharMatched[0].length
+      text = text[0...index] + repeatedCharMatched[1] + new Array(len-1).join(' ') + repeatedCharMatched[1] + text[index + len..]
+      repeatedCharMatched = text.match repetedReg
+
     # match word by length with current dictionary
     if dict?
       i = curr
@@ -432,9 +449,9 @@ module.exports = (options) ->
       {start, props} = word; lastPos = 0
       for t in temp
         if t.curr > lastPos
-          result.push makeValue(word.w.slice(lastPos, t.curr), start + lastPos)
+          result.push makeValue(word.w[lastPos...t.curr], start + lastPos)
         result.push makeValue(t.w, start + t.curr, extend(props, t.props))
-        lastPos += t.curr + t.w.length
+        lastPos = t.curr + t.w.length
 
       lastWord = temp[temp.length - 1]; restPos = lastWord.curr + lastWord.w.length
       if restPos < word.w.length

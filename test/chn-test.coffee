@@ -78,6 +78,23 @@ test 'middleware chn runs', (t) ->
       t.deepEqual result, expected
       t.end()
 
+  t.test '求求求购二手天翼手机机机', (t) ->
+    text = '求求求购二手天翼手机机机'
+    expected = [
+      { w: '求', start: 0, props: { '动词': 1 } }
+      { w: '求', start: 1 }
+      { w: '求购', start: 2, props: { '动词': 1 } }
+      { w: '二手', start: 4, props: { '形容词': 1 } }
+      { w: '天', start: 6 }
+      { w: '翼', start: 7 }
+      { w: '手机', start: 8, props: { '名词': 1 } }
+      { w: '机', start: 10 }
+      { w: '机', start: 11 }
+    ]
+    chnSeg.handle text, (err, result) ->
+      t.deepEqual result, expected
+      t.end()
+
   # t.test '前几天王老头刚收到小孩寄来的照片', (t) ->
   #   text = '前几天王老头刚收到小孩寄来的照片'
   #   expected = [
